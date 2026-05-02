@@ -6,6 +6,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LowercaseEmailPipe } from '../users/pipes/lowercase-email.pipe';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { LowercaseEmailPipe } from '../users/pipes/lowercase-email.pipe';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LowercaseEmailPipe],
+  providers: [AuthService, LowercaseEmailPipe, JwtStrategy],
   exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

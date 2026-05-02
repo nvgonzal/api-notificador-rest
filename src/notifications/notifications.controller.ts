@@ -5,43 +5,44 @@ import {
   Param,
   Query,
   ParseIntPipe,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('notifications')
+@UseGuards(AuthGuard('jwt'))
 export class NotificationsController {
   constructor(private notificationsService: NotificationsService) {}
 
   // GET /notifications?userId=1
   @Get()
-  findByUser(@Query('userId', ParseIntPipe) userId: number) {
-    return this.notificationsService.findByUser(userId);
+  findByUser(@Req() request) {
+    return this.notificationsService.findByUser(request.user.id);
   }
 
   // GET /notifications/unread?userId=1
   @Get('unread')
-  findUnread(@Query('userId', ParseIntPipe) userId: number) {
-    return this.notificationsService.findUnreadByUser(userId);
+  findUnread(@Req() request) {
+    return this.notificationsService.findUnreadByUser(request.user.id);
   }
 
   // GET /notifications/unread/count?userId=1
   @Get('unread/count')
-  countUnread(@Query('userId', ParseIntPipe) userId: number) {
-    return this.notificationsService.countUnread(userId);
+  countUnread(@Req() request) {
+    return this.notificationsService.countUnread(request.user.id);
   }
 
   // PATCH /notifications/:id/read?userId=1
   @Patch(':id/read')
-  markAsRead(
-    @Param('id', ParseIntPipe) id: number,
-    @Query('userId', ParseIntPipe) userId: number,
-  ) {
-    return this.notificationsService.markAsRead(id, userId);
+  markAsRead(@Param('id', ParseIntPipe) id: number, @Req() request) {
+    return this.notificationsService.markAsRead(id, request.user.id);
   }
 
   // PATCH /notifications/read-all?userId=1
   @Patch('read-all')
-  markAllAsRead(@Query('userId', ParseIntPipe) userId: number) {
-    return this.notificationsService.markAllAsRead(userId);
+  markAllAsRead(@Req() request) {
+    return this.notificationsService.markAllAsRead(request.user.id);
   }
 }
