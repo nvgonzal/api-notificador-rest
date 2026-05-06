@@ -18,7 +18,7 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<User> {
     const user = await this.userService.validateCredentials(email, password);
     if (!user) {
-      throw new UnauthorizedException('Credenciales inválidas');
+      throw new UnauthorizedException('Email o contraseña incorrectas.');
     }
     return user;
   }

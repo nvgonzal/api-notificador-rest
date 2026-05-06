@@ -1,9 +1,11 @@
-import { Body, Controller, Post, UsePipes } from '@nestjs/common';
+import { Body, Controller, Get, Post, UsePipes } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dtos/login.dto';
 import { CreateUserDto } from '../users/dtos/create-user.dto';
 import { LowercaseEmailPipe } from '../users/pipes/lowercase-email.pipe';
 import { Public } from './decorators/public.decorator';
+import { User } from '../entity/user.entity';
+import { CurrentUser } from './decorators/current-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -22,5 +24,15 @@ export class AuthController {
   @UsePipes(LowercaseEmailPipe)
   async register(@Body() userDto: CreateUserDto) {
     return this.authService.register(userDto);
+  }
+  @Get('profile')
+  getPrfile(@CurrentUser() user: User) {
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      lastName: user.lastName,
+      createdAt: user.createdAt,
+    };
   }
 }

@@ -4,7 +4,6 @@ import {
   Patch,
   Param,
   ParseIntPipe,
-  Req,
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';

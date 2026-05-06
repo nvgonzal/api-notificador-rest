@@ -1,45 +1,20 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  UsePipes,
-} from '@nestjs/common';
-import { CreateUserDto } from './dtos/create-user.dto';
+import { Body, Controller, Get, Patch } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { User } from '../entity/user.entity';
-import { LowercaseEmailPipe } from './pipes/lowercase-email.pipe';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
-  @Get()
-  findAll(): Promise<User[]> {
-    return this.userService.getAll();
+  @Get('me')
+  getMe(@CurrentUser('id') userId: number) {
+    return this.userService.getOne(userId);
   }
-  @Post()
-  @UsePipes(LowercaseEmailPipe)
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.getOne(id);
-  }
-  @Patch(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
+  @Patch('me')
+  updateMe(
+    @CurrentUser('id') userId: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return this.userService.update(updateUserDto, id);
-  }
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.delete(id);
+    return this.userService.update(updateUserDto, userId);
   }
 }
