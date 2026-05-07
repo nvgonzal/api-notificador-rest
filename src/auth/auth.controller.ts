@@ -6,12 +6,29 @@ import { LowercaseEmailPipe } from '../users/pipes/lowercase-email.pipe';
 import { Public } from './decorators/public.decorator';
 import { User } from '../entity/user.entity';
 import { CurrentUser } from './decorators/current-user.decorator';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+
   @Public()
   @Post('login')
+  @ApiOperation({ summary: 'Inicia sesion en el sistema.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Inicia sesion exitoso, retorna JWT.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Credenciales no validas',
+  })
   async login(@Body() loginDto: LoginDto) {
     const user = await this.authService.validateUser(
       loginDto.email,
@@ -19,14 +36,23 @@ export class AuthController {
     );
     return this.authService.login(user);
   }
+
   @Public()
   @Post('register')
   @UsePipes(LowercaseEmailPipe)
+  @ApiOperation({ summary: 'Registra un nuevo usuario.' })
+  @ApiResponse({ status: 201, description: 'Usuario registrado exitosamente.' })
+  @ApiResponse({ status: 409, description: 'Email ya registrado' })
   async register(@Body() userDto: CreateUserDto) {
     return this.authService.register(userDto);
   }
+
   @Get('profile')
-  getPrfile(@CurrentUser() user: User) {
+  @ApiBearerAuth('JWT')
+  @ApiOperation({ summary: 'Carga el perfil del usuario autenticado.' })
+  @ApiResponse({ status: 200, description: 'Perfil del usuario' })
+  @ApiResponse({ status: 401, description: 'Token no valido' })
+  getProfile(@CurrentUser() user: User) {
     return {
       id: user.id,
       name: user.name,
