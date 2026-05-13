@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { User } from '../entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -16,6 +16,10 @@ export class UsersService {
     private readonly eventEmitter: EventEmitter2,
   ) {}
   async create(user: CreateUserDto) {
+    const existing = await this.userRepository.findOneBy({ email: user.email });
+    if (existing) {
+      throw new ConflictException('Ya existe un usuario con ese email');
+    }
     const newUser = new User();
     newUser.name = user.name;
     newUser.email = user.email;
@@ -32,8 +36,12 @@ export class UsersService {
   getAll(): Promise<User[]> {
     return this.userRepository.find();
   }
-  getOne(id: number) {
-    return this.userRepository.findOneBy({ id });
+  async getOne(id: number) {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+    return user;
   }
   async update(updatedUser: UpdateUserDto, id: number) {
     const user = await this.userRepository.findOneBy({ id: id });
@@ -53,6 +61,18 @@ export class UsersService {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return null;
+    }
+    return user;
+  }
+  async findOneWithNotifications(id: number): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['notifications'],
+      order: { notifications: { createdAt: 'DESC' } },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
     }
     return user;
   }
