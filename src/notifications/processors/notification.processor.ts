@@ -28,11 +28,11 @@ export class NotificationProcessor extends WorkerHost {
       `Procesando job ${job.id}: email de bienvenida para ${job.data.email}`,
     );
     await this.mailService.sendWelcomeEmail(job.data.email, job.data.name);
-    await this.notificationService.create(
-      job.data.userId,
-      'welcome',
-      `Email de bienvenida enviado a ${job.data.email}`,
-    );
+    await this.notificationService.create({
+      userId: job.data.userId,
+      type: 'welcome',
+      message: `Email de bienvenida enviado a ${job.data.email}`,
+    });
     this.logger.log(`Datos del job: ${JSON.stringify(job.data)}`);
     return { sent: true };
   }

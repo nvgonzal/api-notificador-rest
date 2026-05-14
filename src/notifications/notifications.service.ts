@@ -9,11 +9,8 @@ export class NotificationsService {
     @InjectRepository(Notification)
     private readonly notificationRepository: Repository<Notification>,
   ) {}
-  async create(userId: number, type: string, message: string) {
-    const notification = new Notification();
-    notification.userId = userId;
-    notification.message = message;
-    notification.type = type;
+  async create(data: { userId: number; type: string; message: string }) {
+    const notification = this.notificationRepository.create(data);
     return this.notificationRepository.save(notification);
   }
   // Obtener notificaciones de un usuario, las más recientes primero
